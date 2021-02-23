@@ -1,0 +1,65 @@
+@import './_colors.scss';
+
+.darkBlue {
+  color: $darkBlue;
+}
+
+.darkerBlue {
+  color: $darkerBlue;
+}
+
+.orange {
+  color: $orange;
+}
+
+.peach {
+  color: $peach;
+}
+
+.green {
+  color: $green;
+}
+
+.olive {
+  color: $olive;
+}
+
+.tan {
+  color: $tan;
+}
+
+.white {
+  color: $white;
+}
+
+.darkBlueBg {
+  background-color: $darkBlue;
+}
+
+.darkerBlueBg {
+  background-color: $darkerBlue;
+}
+
+.orangeBg {
+  background-color: $orange;
+}
+
+.peachBg {
+  background-color: $peach;
+}
+
+.greenBg {
+  background-color: $green;
+}
+
+.oliveBg {
+  background-color: $olive;
+}
+
+.tanBg {
+  background-color: $tan;
+}
+
+.whiteBg {
+  background-color: $white;
+}
