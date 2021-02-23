@@ -11,15 +11,21 @@ export function post(url, data) {
 }
 
 export function checkStatus(response) {
-  if (response.status >= 200 && response.status < 300) {
+  if (response && response.status >= 200 && response.status < 300) {
     return response;
   }
 
-  const error = new Error(response.statusText);
+  const error = new Error(response && response.statusText);
   error.response = response;
   throw error;
 }
 
 export function parseJson(res) {
   return res.json();
+}
+
+export function getVaxAppointments() {
+  return post('/vax')
+    .then(checkStatus)
+    .then(parseJson);
 }

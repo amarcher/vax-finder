@@ -3,6 +3,7 @@ const favicon = require('express-favicon');
 const path = require('path');
 const bodyParser = require('body-parser');
 const { redirectToHTTPS } = require('express-http-to-https');
+const getVaxAppointments = require('./vaxAppointments');
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -24,8 +25,12 @@ app.use(express.static(path.join(__dirname, 'public', 'fonts')));
 
 app.get('/ping', (req, res) => res.send('pong'));
 
-app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, 'build', 'index.html'))
-);
+app.post('/vax', (req, res) => {
+  getVaxAppointments().then(res.json);
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 app.listen(port);
