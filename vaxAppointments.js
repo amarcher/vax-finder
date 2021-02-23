@@ -1,7 +1,9 @@
 const { JSDOM } = require('jsdom');
 
-export default function getVaxAppointments() {
+function getVaxAppointments() {
   return Promise.resolve({
     something: 'else',
   });
 }
+
+module.exports = getVaxAppointments;
