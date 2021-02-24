@@ -10,11 +10,11 @@ function Nav() {
         <ul className="nav__list">
           <li className="nav__list-item">
             <NavLink to="/" exact>
-              Home
+              Massachusetts Clinics
             </NavLink>
           </li>
           <li className="nav__list-item">
-            <NavLink to="/other">Something Else</NavLink>
+            <NavLink to="/disclaimer">Disclaimer</NavLink>
           </li>
         </ul>
       </nav>

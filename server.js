@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'public', 'fonts')));
 app.get('/ping', (req, res) => res.send('pong'));
 
 app.post('/vax', (req, res) => {
-  getVaxAppointments().then(res.json);
+  getVaxAppointments().then((result) => res.json(result));
 });
 
 app.get('*', (req, res) => {
