@@ -4,11 +4,11 @@ import Clinic from '../components/Clinic';
 
 import './Home.scss';
 
-function Home() {
+function RhodeIsland() {
   const [vaxAppointments, setVaxAppointments] = useState(null);
 
   useEffect(() => {
-    getVaxAppointments('ma').then((vaxResults) => {
+    getVaxAppointments('ri').then((vaxResults) => {
       if (vaxResults) {
         setVaxAppointments(vaxResults);
       }
@@ -26,4 +26,4 @@ function Home() {
   return <div className="home">{clinics || 'Loading'}</div>;
 }
 
-export default Home;
+export default RhodeIsland;

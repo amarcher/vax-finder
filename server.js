@@ -26,7 +26,8 @@ app.use(express.static(path.join(__dirname, 'public', 'fonts')));
 app.get('/ping', (req, res) => res.send('pong'));
 
 app.post('/vax', (req, res) => {
-  getVaxAppointments().then((result) => res.json(result));
+  const state = req.body && req.body.data && req.body.data.state;
+  getVaxAppointments(state).then((result) => res.json(result));
 });
 
 app.get('*', (req, res) => {

@@ -24,8 +24,12 @@ export function parseJson(res) {
   return res.json();
 }
 
-export function getVaxAppointments() {
-  return post('/vax')
+export function getVaxAppointments(state) {
+  return post('/vax', {
+    data: {
+      state,
+    },
+  })
     .then(checkStatus)
     .then(parseJson);
 }
