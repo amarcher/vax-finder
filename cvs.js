@@ -51,7 +51,7 @@ async function fetchCVSData(stateDataSelector) {
 
   try {
     browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: ['--incognito', '--no-sandbox', '--single-process', '--no-zygote'],
     });
     const page = await browser.newPage();
     await page.goto(CVS_URL);
