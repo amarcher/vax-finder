@@ -50,7 +50,9 @@ async function fetchCVSData(stateDataSelector) {
       : MA_STATUS_SELECTOR;
 
   try {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
     const page = await browser.newPage();
     await page.goto(CVS_URL);
     await page.click(stateDataSelector);
