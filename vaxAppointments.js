@@ -4,7 +4,6 @@ const { JSDOM } = require('jsdom');
 const BASE_URL =
   'https://cw2-massachusetts-production-herokuapp-com.global.ssl.fastly.net/';
 const RI_BASE_URL = 'https://www.vaccinateri.org/';
-
 const FIRST_PAGE =
   'clinic/search?location=&search_radius=All&q%5Bvenue_search_name_or_venue_name_i_cont%5D=&q%5Bclinic_date_gteq%5D=&q%5Bvaccinations_name_i_cont%5D=&commit=Search';
 const NAV_LINK = 'nav a[href*="/clinic"]';

@@ -10,7 +10,7 @@
 
   @include breakpoint(mobile) {
     margin: 16px 0;
-    width: 100%;
+    width: calc(100% - 32px);
   }
 }
 
