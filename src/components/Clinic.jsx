@@ -20,7 +20,9 @@ function Clinic({
       <div className="clinic__name">{name}</div>
       <div className="clinic__address">{address}</div>
       <div className="clinic__appointments">
-        {appointments}
+        {name.substring(0, 3) === 'CVS' && appointments > 0
+          ? 'Some'
+          : appointments}
         <span> Appointment(s) Available</span>
       </div>
       <div className="clinic__additional_info">{additionalInfo}</div>

@@ -14,13 +14,12 @@ const MA_STATUS_SELECTOR =
 const CITY_SELECTOR = 'span.city';
 const STATUS_SELECTOR = 'span.status';
 
-function shouldRefetch() {
-  return true; // TODO: do this less often
-}
-
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+let riResults = [];
+let maResults = [];
 
 async function getCvsNames(rawHtml) {
   const {
@@ -36,7 +35,7 @@ async function getCvsNames(rawHtml) {
   return cities.map((cityName, index) => ({
     name: `CVS in ${capitalizeFirstLetter(cityName)}`,
     address: capitalizeFirstLetter(cityName),
-    appointments: statuses[index] === 'Available' ? 'Some' : 0,
+    appointments: statuses[index] === 'Available' ? 1 : 0,
     registrationHref: REGISTRATION_LINK,
     additionalInfo: 'Check CVS website to see qualifications.',
   }));
@@ -74,10 +73,14 @@ async function fetchCVSData(stateDataSelector) {
 function getCvsAvailability(state) {
   const stateDataSelector =
     state === 'ri' ? RI_DATA_SELECTOR : MA_DATA_SELECTOR;
-  if (shouldRefetch()) {
-    return fetchCVSData(stateDataSelector);
-  }
-  return Promise.resolve([]);
+  fetchCVSData(stateDataSelector).then((stateData) => {
+    if (state === 'ri') {
+      riResults = stateData;
+    } else {
+      maResults = stateData;
+    }
+  });
+  return Promise.resolve((state === 'ri' ? riResults : maResults) || []);
 }
 
 module.exports = getCvsAvailability;
