@@ -1,5 +1,8 @@
 const got = require('got');
 const { JSDOM } = require('jsdom');
+const timeoutWithCachedData = require('./timeout');
+
+const TIMEOUT = 5000;
 
 const BASE_URL =
   'https://cw2-massachusetts-production-herokuapp-com.global.ssl.fastly.net/';
@@ -11,6 +14,9 @@ const CLINIC_DIV = '.justify-between.border-gray-200';
 const REGISTRATION_LINK = '[href*="/client/registration"]';
 const NAME_PARAGRAPH = 'p.text-xl.font-black';
 const ADDRESS_PARAGRAPH = 'p.text-xl.font-black + p';
+
+let maCachedData = [];
+let riCachedData = [];
 
 function getFirstPage(baseUrl) {
   return `${baseUrl}${FIRST_PAGE}`;
@@ -82,9 +88,10 @@ function getAppointments(document, baseUrl) {
 
 function getVaxAppointments(state) {
   const baseUrl = state === 'ri' ? RI_BASE_URL : BASE_URL;
+  const cachedData = state === 'ri' ? riCachedData : maCachedData;
 
-  return got(getFirstPage(baseUrl))
-    .then((firstPageResponse) => {
+  return timeoutWithCachedData(
+    got(getFirstPage(baseUrl)).then((firstPageResponse) => {
       const firstPageDom = new JSDOM(firstPageResponse.body);
 
       const hrefs = getNavHrefs(firstPageDom.window.document, baseUrl);
@@ -94,14 +101,25 @@ function getVaxAppointments(state) {
           const laterPageDoms = laterPageResponses.map(
             (response) => new JSDOM(response.body)
           );
-          return [firstPageDom, ...laterPageDoms]
+          const data = [firstPageDom, ...laterPageDoms]
             .map((dom) => getAppointments(dom.window.document, baseUrl))
             .flat()
             .sort((a, b) => b.appointments - a.appointments);
+
+          console.log(`Caching ${state} clinic data: ${data.length} result(s)`);
+          if (state === 'ri') {
+            riCachedData = data;
+          } else {
+            maCachedData = data;
+          }
+
+          return data;
         }
       );
-    })
-    .catch(console.error);
+    }),
+    cachedData || [],
+    TIMEOUT
+  ).catch(console.error);
 }
 
 module.exports = getVaxAppointments;

@@ -15,15 +15,17 @@ function RhodeIsland() {
     });
   }, []);
 
-  let clinics = null;
+  let clinics = 'Loading';
 
-  if (vaxAppointments) {
+  if (vaxAppointments && vaxAppointments.length) {
     clinics = vaxAppointments.map((clinic, index) => (
       <Clinic {...clinic} key={clinic.name || index} />
     ));
+  } else if (vaxAppointments) {
+    clinics = 'No appointments found';
   }
 
-  return <div className="home">{clinics || 'Loading'}</div>;
+  return <div className="home">{clinics}</div>;
 }
 
 export default RhodeIsland;

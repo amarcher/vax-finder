@@ -15,15 +15,17 @@ function Home() {
     });
   }, []);
 
-  let clinics = null;
+  let clinics = 'Loading';
 
-  if (vaxAppointments) {
+  if (vaxAppointments && vaxAppointments.length) {
     clinics = vaxAppointments.map((clinic, index) => (
       <Clinic {...clinic} key={clinic.name || index} />
     ));
+  } else if (vaxAppointments) {
+    clinics = 'No appointments at this time';
   }
 
-  return <div className="home">{clinics || 'Loading'}</div>;
+  return <div className="home">{clinics}</div>;
 }
 
 export default Home;

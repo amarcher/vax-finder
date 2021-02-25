@@ -1,5 +1,8 @@
 const puppeteer = require('puppeteer');
 const { JSDOM } = require('jsdom');
+const timeoutWithCachedData = require('./timeout');
+
+const TIMEOUT = 5000;
 
 const CVS_URL =
   'https://www.cvs.com/immunizations/covid-19-vaccine?icid=cvs-home-hero1-link2-coronavirus-vaccine#acc_link_content_section_box_251541438_boxpar_accordion_910919113_2';
@@ -63,6 +66,7 @@ async function fetchCVSData(stateDataSelector) {
       (element) => element.innerHTML
     );
     results = getCvsNames(rawHtml);
+
     await browser.close();
   } catch (e) {
     if (browser) {
@@ -76,14 +80,22 @@ async function fetchCVSData(stateDataSelector) {
 function getCvsAvailability(state) {
   const stateDataSelector =
     state === 'ri' ? RI_DATA_SELECTOR : MA_DATA_SELECTOR;
-  fetchCVSData(stateDataSelector).then((stateData) => {
-    if (state === 'ri') {
-      riResults = stateData;
-    } else {
-      maResults = stateData;
-    }
-  });
-  return Promise.resolve((state === 'ri' ? riResults : maResults) || []);
+  const cachedData = state === 'ri' ? riResults : maResults;
+
+  return timeoutWithCachedData(
+    fetchCVSData(stateDataSelector).then((stateData) => {
+      console.log(`Caching ${state} CVS data: ${stateData.length} result(s)`);
+
+      if (state === 'ri') {
+        riResults = stateData;
+      } else {
+        maResults = stateData;
+      }
+      return stateData;
+    }),
+    cachedData || [],
+    TIMEOUT
+  );
 }
 
 module.exports = getCvsAvailability;
