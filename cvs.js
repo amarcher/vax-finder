@@ -7,6 +7,10 @@ const REGISTRATION_LINK =
   'https://www.cvs.com/vaccine/intake/store/cvd-schedule?icid=coronavirus-lp-vaccine-sd-statetool';
 const MA_DATA_SELECTOR = 'a[data-modal="vaccineinfo-MA"]';
 const RI_DATA_SELECTOR = 'a[data-modal="vaccineinfo-RI"]';
+const RI_STATUS_SELECTOR =
+  '[data-url="/immunizations/covid-19-vaccine.vaccine-status.RI.json?vaccineinfo"]';
+const MA_STATUS_SELECTOR =
+  '[data-url="/immunizations/covid-19-vaccine.vaccine-status.ma.json?vaccineinfo"]';
 const CITY_SELECTOR = 'span.city';
 const STATUS_SELECTOR = 'span.status';
 
@@ -41,15 +45,19 @@ async function getCvsNames(rawHtml) {
 async function fetchCVSData(stateDataSelector) {
   let results = [];
   let browser;
+  const covidStatusSelector =
+    stateDataSelector === RI_DATA_SELECTOR
+      ? RI_STATUS_SELECTOR
+      : MA_STATUS_SELECTOR;
 
   try {
     browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.goto(CVS_URL);
     await page.click(stateDataSelector);
-    await page.waitForSelector('.covid-status', { visible: true });
+    await page.waitForSelector(covidStatusSelector, { visible: true });
     const rawHtml = await page.$eval(
-      '.covid-status',
+      covidStatusSelector,
       (element) => element.innerHTML
     );
     results = getCvsNames(rawHtml);
