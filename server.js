@@ -4,6 +4,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const { redirectToHTTPS } = require('express-http-to-https');
 const getVaxAppointments = require('./vaxAppointments');
+const getCvsAvailability = require('./cvs');
 
 const port = process.env.PORT || 8080;
 const app = express();
@@ -27,7 +28,11 @@ app.get('/ping', (req, res) => res.send('pong'));
 
 app.post('/vax', (req, res) => {
   const state = req.body && req.body.data && req.body.data.state;
-  getVaxAppointments(state).then((result) => res.json(result));
+  Promise.all([getCvsAvailability(state), getVaxAppointments(state)])
+    .then((results) =>
+      results.flat().sort((a, b) => b.appointments - a.appointments)
+    )
+    .then((allData) => res.json(allData));
 });
 
 app.get('*', (req, res) => {
