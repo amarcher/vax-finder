@@ -2,7 +2,7 @@ const got = require('got');
 const { JSDOM } = require('jsdom');
 const timeoutWithCachedData = require('./timeout');
 
-const TIMEOUT = 5000;
+const TIMEOUT = 3000;
 
 const BASE_URL =
   'https://cw2-massachusetts-production-herokuapp-com.global.ssl.fastly.net/';

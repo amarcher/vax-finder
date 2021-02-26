@@ -40,3 +40,7 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port);
+
+console.log(
+  `Server has started in ${process.env.NODE_ENV || 'development'} environment`
+);

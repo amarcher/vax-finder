@@ -2,7 +2,19 @@ const puppeteer = require('puppeteer');
 const { JSDOM } = require('jsdom');
 const timeoutWithCachedData = require('./timeout');
 
-const TIMEOUT = 5000;
+const TIMEOUT = 1000;
+const PUPPETEER_OPTIONS =
+  process.env.NODE_ENV === 'production'
+    ? {
+        headless: true,
+        args: [
+          '--incognito',
+          '--no-sandbox',
+          '--single-process',
+          '--no-zygote',
+        ],
+      }
+    : {};
 
 const CVS_URL =
   'https://www.cvs.com/immunizations/covid-19-vaccine?icid=cvs-home-hero1-link2-coronavirus-vaccine#acc_link_content_section_box_251541438_boxpar_accordion_910919113_2';
@@ -23,6 +35,8 @@ function capitalizeFirstLetter(string) {
 
 let riResults = [];
 let maResults = [];
+let isCrawlingRi = false;
+let isCrawlingMa = false;
 
 async function getCvsNames(rawHtml) {
   const {
@@ -44,19 +58,34 @@ async function getCvsNames(rawHtml) {
   }));
 }
 
-async function fetchCVSData(stateDataSelector) {
+async function fetchCVSData(state) {
   let results = [];
   let browser;
   const covidStatusSelector =
-    stateDataSelector === RI_DATA_SELECTOR
-      ? RI_STATUS_SELECTOR
-      : MA_STATUS_SELECTOR;
+    state === 'ri' ? RI_STATUS_SELECTOR : MA_STATUS_SELECTOR;
+  const stateDataSelector =
+    state === 'ri' ? RI_DATA_SELECTOR : MA_DATA_SELECTOR;
+
+  if (state === 'ri') {
+    if (isCrawlingRi) {
+      return Promise.resolve(riResults);
+    }
+
+    isCrawlingRi = true;
+    console.log('Starting CVS Crawl for RI');
+  }
+
+  if (state === 'ma') {
+    if (isCrawlingMa) {
+      return Promise.resolve(maResults);
+    }
+
+    isCrawlingMa = true;
+    console.log('Starting CVS Crawl for MA');
+  }
 
   try {
-    browser = await puppeteer.launch({
-      headless: true,
-      args: ['--incognito', '--no-sandbox', '--single-process', '--no-zygote'],
-    });
+    browser = await puppeteer.launch(PUPPETEER_OPTIONS);
     const page = await browser.newPage();
     await page.goto(CVS_URL);
     await page.click(stateDataSelector);
@@ -65,10 +94,33 @@ async function fetchCVSData(stateDataSelector) {
       covidStatusSelector,
       (element) => element.innerHTML
     );
-    results = getCvsNames(rawHtml);
+    results = await getCvsNames(rawHtml);
+
+    console.log(`Caching ${state} CVS data: ${results.length} result(s)`);
+
+    if (state === 'ri') {
+      riResults = results;
+      isCrawlingRi = false;
+    }
+
+    if (state === 'ma') {
+      maResults = results;
+      isCrawlingMa = false;
+    }
 
     await browser.close();
   } catch (e) {
+    console.log('ERROR');
+    console.log(e);
+
+    if (state === 'ri') {
+      isCrawlingRi = false;
+    }
+
+    if (state === 'ma') {
+      isCrawlingMa = false;
+    }
+
     if (browser) {
       await browser.close();
     }
@@ -78,24 +130,8 @@ async function fetchCVSData(stateDataSelector) {
 }
 
 function getCvsAvailability(state) {
-  const stateDataSelector =
-    state === 'ri' ? RI_DATA_SELECTOR : MA_DATA_SELECTOR;
   const cachedData = state === 'ri' ? riResults : maResults;
-
-  return timeoutWithCachedData(
-    fetchCVSData(stateDataSelector).then((stateData) => {
-      console.log(`Caching ${state} CVS data: ${stateData.length} result(s)`);
-
-      if (state === 'ri') {
-        riResults = stateData;
-      } else {
-        maResults = stateData;
-      }
-      return stateData;
-    }),
-    cachedData || [],
-    TIMEOUT
-  );
+  return timeoutWithCachedData(fetchCVSData(state), cachedData || [], TIMEOUT);
 }
 
 module.exports = getCvsAvailability;
