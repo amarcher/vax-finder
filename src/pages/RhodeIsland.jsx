@@ -10,7 +10,7 @@ function RhodeIsland() {
   useEffect(() => {
     getVaxAppointments('ri').then((vaxResults) => {
       if (vaxResults) {
-        setVaxAppointments(vaxResults?.filter(Boolean));
+        setVaxAppointments(vaxResults.filter(Boolean));
       }
     });
   }, []);
@@ -19,7 +19,7 @@ function RhodeIsland() {
 
   if (vaxAppointments && vaxAppointments.length) {
     clinics = vaxAppointments.map((clinic, index) => (
-      <Clinic {...clinic} key={clinic?.name || index} />
+      <Clinic {...clinic} key={(clinic && clinic.name) || index} />
     ));
   } else if (vaxAppointments) {
     clinics = 'No appointments found';
