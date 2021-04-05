@@ -10,7 +10,7 @@ function Home() {
   useEffect(() => {
     getVaxAppointments('ma').then((vaxResults) => {
       if (vaxResults) {
-        setVaxAppointments(vaxResults?.filter(Boolean)));
+        setVaxAppointments(vaxResults?.filter(Boolean));
       }
     });
   }, []);
