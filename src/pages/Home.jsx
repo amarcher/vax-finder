@@ -10,7 +10,7 @@ function Home() {
   useEffect(() => {
     getVaxAppointments('ma').then((vaxResults) => {
       if (vaxResults) {
-        setVaxAppointments(vaxResults);
+        setVaxAppointments(vaxResults?.filter(Boolean)));
       }
     });
   }, []);
@@ -19,7 +19,7 @@ function Home() {
 
   if (vaxAppointments && vaxAppointments.length) {
     clinics = vaxAppointments.map((clinic, index) => (
-      <Clinic {...clinic} key={clinic.name || index} />
+      <Clinic {...clinic} key={clinic?.name || index} />
     ));
   } else if (vaxAppointments) {
     clinics = 'No appointments at this time';
