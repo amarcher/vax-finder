@@ -3,29 +3,26 @@ const { JSDOM } = require('jsdom');
 const timeoutWithCachedData = require('./timeout');
 
 const TIMEOUT = 1000;
-const PUPPETEER_OPTIONS =
-  process.env.NODE_ENV === 'production'
-    ? {
-        headless: true,
-        args: [
-          '--incognito',
-          '--no-sandbox',
-          '--single-process',
-          '--no-zygote',
-        ],
-      }
-    : {};
+const PUPPETEER_OPTIONS = process.env.NODE_ENV === 'production'
+  ? {
+    headless: true,
+    args: [
+      '--incognito',
+      '--no-sandbox',
+      '--single-process',
+      '--no-zygote',
+    ],
+  }
+  : {};
 
-const CVS_URL =
-  'https://www.cvs.com/immunizations/covid-19-vaccine?icid=cvs-home-hero1-link2-coronavirus-vaccine#acc_link_content_section_box_251541438_boxpar_accordion_910919113_2';
-const REGISTRATION_LINK =
-  'https://www.cvs.com/vaccine/intake/store/cvd-schedule?icid=coronavirus-lp-vaccine-sd-statetool';
-const MA_DATA_SELECTOR = 'a[data-modal="vaccineinfo-MA"]';
-const RI_DATA_SELECTOR = 'a[data-modal="vaccineinfo-RI"]';
-const RI_STATUS_SELECTOR =
-  '[data-url="/immunizations/covid-19-vaccine.vaccine-status.RI.json?vaccineinfo"]';
-const MA_STATUS_SELECTOR =
-  '[data-url="/immunizations/covid-19-vaccine.vaccine-status.ma.json?vaccineinfo"]';
+const CVS_URL = 'https://www.cvs.com/immunizations/covid-19-vaccine?icid=cvs-home-hero1-link2-coronavirus-vaccine#acc_link_content_section_box_251541438_boxpar_accordion_910919113_2';
+const REGISTRATION_LINK = 'https://www.cvs.com/vaccine/intake/store/cvd-schedule?icid=coronavirus-lp-vaccine-sd-statetool';
+const MA_DATA_SELECTOR = '[data-modal="vaccineinfo-MA"]';
+const RI_DATA_SELECTOR = '[data-modal="vaccineinfo-RI"]';
+const MA_OPTION_SELECTOR = 'option[value="MA"]';
+const RI_OPTION_SELECTOR = 'option[value="RI"]';
+const RI_STATUS_SELECTOR = '[data-url="/immunizations/covid-19-vaccine.vaccine-status.RI.json?vaccineinfo"]';
+const MA_STATUS_SELECTOR = '[data-url="/immunizations/covid-19-vaccine.vaccine-status.ma.json?vaccineinfo"]';
 const CITY_SELECTOR = 'span.city';
 const STATUS_SELECTOR = 'span.status';
 
@@ -43,10 +40,10 @@ async function getCvsNames(rawHtml) {
     window: { document },
   } = new JSDOM(`<html><body>${rawHtml}</body></html>`);
   const cities = Array.from(document.querySelectorAll(CITY_SELECTOR)).map(
-    (node) => node.textContent.trim()
+    node => node.textContent.trim(),
   );
   const statuses = Array.from(document.querySelectorAll(STATUS_SELECTOR)).map(
-    (node) => node.textContent.trim()
+    node => node.textContent.trim(),
   );
 
   return cities.map((cityName, index) => ({
@@ -61,10 +58,9 @@ async function getCvsNames(rawHtml) {
 async function fetchCVSData(state) {
   let results = [];
   let browser;
-  const covidStatusSelector =
-    state === 'ri' ? RI_STATUS_SELECTOR : MA_STATUS_SELECTOR;
-  const stateDataSelector =
-    state === 'ri' ? RI_DATA_SELECTOR : MA_DATA_SELECTOR;
+  const covidStatusSelector = state === 'ri' ? RI_STATUS_SELECTOR : MA_STATUS_SELECTOR;
+  const stateOption = state === 'ri' ? RI_OPTION_SELECTOR : MA_OPTION_SELECTOR;
+  const stateDataSelector = state === 'ri' ? RI_DATA_SELECTOR : MA_DATA_SELECTOR;
 
   if (state === 'ri') {
     if (isCrawlingRi) {
@@ -88,11 +84,13 @@ async function fetchCVSData(state) {
     browser = await puppeteer.launch(PUPPETEER_OPTIONS);
     const page = await browser.newPage();
     await page.goto(CVS_URL);
+    await page.click('#selectstate');
+    await page.click(stateOption);
     await page.click(stateDataSelector);
     await page.waitForSelector(covidStatusSelector, { visible: true });
     const rawHtml = await page.$eval(
       covidStatusSelector,
-      (element) => element.innerHTML
+      element => element.innerHTML,
     );
     results = await getCvsNames(rawHtml);
 
